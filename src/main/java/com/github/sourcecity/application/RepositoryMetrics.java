@@ -1,9 +1,15 @@
 package com.github.sourcecity.application;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class RepositoryMetrics {
+
+    private static final Pattern DEPENDENCY_PATTERN = Pattern.compile("^import ", Pattern.MULTILINE);
 
     private final String id;
     private final String name;
@@ -14,18 +20,39 @@ public class RepositoryMetrics {
         this.name = name;
     }
 
-    public void add(String fileName, int loc) {
-        fileMetrics.add(new FileMetrics(fileName, loc));
+    public void collectFrom(String fileName, String sourceCode) {
+        int loc = calculateLOC(sourceCode);
+        int dependencies = calculateDependencies(sourceCode);
+        fileMetrics.add(new FileMetrics(fileName, loc, dependencies));
+    }
+
+    private int calculateDependencies(String sourceCode) {
+        Matcher matcher = DEPENDENCY_PATTERN.matcher(sourceCode);
+        int dependencies = 0;
+        while (matcher.find()) {
+            dependencies++;
+        }
+        return dependencies;
+    }
+
+    private int calculateLOC(String sourceCode) {
+        return StringUtils.countMatches(sourceCode, '\n');
+    }
+
+    public String id() {
+        return id;
     }
 
     private static class FileMetrics {
 
         private final String fileName;
         private final int loc;
+        private final int dependencies;
 
-        public FileMetrics(String fileName, int loc) {
+        public FileMetrics(String fileName, int loc, int dependencies) {
             this.fileName = fileName;
             this.loc = loc;
+            this.dependencies = dependencies;
         }
     }
 }
