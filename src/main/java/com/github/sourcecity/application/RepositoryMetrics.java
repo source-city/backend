@@ -60,12 +60,12 @@ public class RepositoryMetrics {
 
     private static class FileMetrics {
 
-        private final String className;
+        private final String label;
         private final int loc;
         private final int dependencies;
 
-        public FileMetrics(String className, int loc, int dependencies) {
-            this.className = className;
+        public FileMetrics(String label, int loc, int dependencies) {
+            this.label = label;
             this.loc = loc;
             this.dependencies = dependencies;
         }
