@@ -4,12 +4,14 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RepositoryMetrics {
 
     private static final Pattern DEPENDENCY_PATTERN = Pattern.compile("^import ", Pattern.MULTILINE);
+    public static final String COLLECTION_NAME = "repositoryMetrics";
 
     private final String id;
     private final String name;
@@ -24,6 +26,9 @@ public class RepositoryMetrics {
         int loc = calculateLOC(sourceCode);
         int dependencies = calculateDependencies(sourceCode);
         fileMetrics.add(new FileMetrics(fileName, loc, dependencies));
+    }
+    public void forEachFile(Consumer<FileMetrics> consumer){
+        fileMetrics.forEach(consumer);
     }
 
     private int calculateDependencies(String sourceCode) {

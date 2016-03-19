@@ -1,7 +1,6 @@
 package com.github.sourcecity.application;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 
@@ -48,7 +47,7 @@ public class CalculateMetricsJob implements Runnable {
     }
 
     private void store(RepositoryMetrics repositoryMetrics) {
-        String collectionName = StringUtils.uncapitalize(repositoryMetrics.getClass().getSimpleName());
+        String collectionName = RepositoryMetrics.COLLECTION_NAME;
         if (mongo.exists(new Query().addCriteria(where("_id").is(repositoryMetrics.id())), collectionName)) {
             mongo.remove(repositoryMetrics, collectionName);
         }
