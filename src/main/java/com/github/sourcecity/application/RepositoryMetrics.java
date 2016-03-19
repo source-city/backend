@@ -35,8 +35,11 @@ public class RepositoryMetrics {
 
     private String composeClassName(String fileName, String sourceCode) {
         Matcher matcher = PACKAGE_PATTERN.matcher(sourceCode);
-        matcher.find();
-        String packageName = matcher.group(1);
+
+        String packageName = "(default)";
+        if (matcher.matches()){
+            packageName = matcher.group(1);
+        }
         String classSimpleName = substringBeforeLast(substringAfterLast(fileName, "/"), ".");
         return String.format("%s.%s", packageName, classSimpleName);
     }

@@ -10,19 +10,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.concurrent.CompletableFuture;
-
 @RestController
 @RequestMapping("repositories")
 public class RepositoryEndpoint {
 
     @Autowired
     private MongoTemplate mongo;
+    @Autowired
+    private CalculateMetricsJob job;
 
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Void> register(@RequestBody RepositoryJson definition) {
-        CalculateMetricsJob job = new CalculateMetricsJob(definition.url, definition.name, mongo);
-        CompletableFuture.runAsync(job);
+        job.schedule(definition.name, definition.url);
         return ResponseEntity.accepted().build();
     }
 

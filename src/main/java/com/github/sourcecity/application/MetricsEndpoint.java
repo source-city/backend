@@ -20,7 +20,7 @@ public class MetricsEndpoint {
     private MongoTemplate mongo;
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, value = "/{metricsId}")
-    public Map<String, Object> list(@PathVariable String metricsId) throws UnsupportedEncodingException {
+    public Map<String, Object> projectMetrics(@PathVariable String metricsId) throws UnsupportedEncodingException {
         String decodedMetricsId = new String(Base64.getDecoder().decode(metricsId), "UTF-8");
         Map<String, Object> repository = mongo.findById(decodedMetricsId, Map.class, RepositoryMetrics.COLLECTION_NAME);
         repository.remove("_id");
