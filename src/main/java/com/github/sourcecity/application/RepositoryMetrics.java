@@ -13,7 +13,7 @@ import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 public class RepositoryMetrics {
 
     private static final Pattern DEPENDENCY_PATTERN = Pattern.compile("^import ", Pattern.MULTILINE);
-    private static final Pattern PACKAGE_PATTERN = Pattern.compile("^package (.*);");
+    private static final Pattern PACKAGE_PATTERN = Pattern.compile("^\\s*package\\s+(.*);", Pattern.MULTILINE);
 
     public static final String COLLECTION_NAME = "repositoryMetrics";
 
@@ -38,12 +38,13 @@ public class RepositoryMetrics {
     private String composeClassName(String fileName, String sourceCode) {
         Matcher matcher = PACKAGE_PATTERN.matcher(sourceCode);
 
-        String packageName = "(default)";
-        if (matcher.matches()){
+        String packageName = "";
+        if (matcher.find()){
             packageName = matcher.group(1);
         }
         String classSimpleName = substringBeforeLast(substringAfterLast(fileName, "/"), ".");
-        return String.format("%s.%s", packageName, classSimpleName);
+
+        return packageName.isEmpty() ? classSimpleName : String.format("%s.%s", packageName, classSimpleName);
     }
 
     private int calculateDependencies(String sourceCode) {
@@ -71,6 +72,7 @@ public class RepositoryMetrics {
         return url;
     }
 
+    @SuppressWarnings("unused")
     private static class FileMetrics {
 
         private final String label;
