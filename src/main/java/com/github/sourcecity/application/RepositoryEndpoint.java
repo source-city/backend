@@ -21,6 +21,7 @@ public class RepositoryEndpoint {
 
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Void> register(@RequestBody RepositoryJson definition) {
+        mongo.insert(new ScheduledMetrics(RepositoryId.generate(definition.url), definition.name, definition.url));
         job.schedule(definition.name, definition.url);
         return ResponseEntity.accepted().build();
     }

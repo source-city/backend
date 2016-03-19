@@ -48,7 +48,7 @@ public class CalculateMetricsJob {
 
         @Override
         public void run() {
-            URLConnection urlConnection = null;
+            URLConnection urlConnection;
             try {
                 urlConnection = repositoryUrl(repositoryUrl).openConnection();
             } catch (IOException e) {
@@ -61,7 +61,7 @@ public class CalculateMetricsJob {
 
                 ProgressCapturingStream progress = new ProgressCapturingStream(stream);
 
-                RepositoryMetrics repositoryMetrics = new RepositoryMetrics(repositoryUrl, repositoryName);
+                RepositoryMetrics repositoryMetrics = new RepositoryMetrics(RepositoryId.generate(repositoryUrl), repositoryName);
                 ZipInputStream zipInputStream = new ZipInputStream(progress);
                 ZipEntry zipEntry;
                 int lastUpdate = 0;
@@ -111,9 +111,10 @@ public class CalculateMetricsJob {
         }
 
         private void store(RepositoryMetrics repositoryMetrics) {
-            String collectionName = RepositoryMetrics.COLLECTION_NAME;
-            if (mongo.exists(new Query().addCriteria(where("_id").is(repositoryMetrics.id())), collectionName)) {
-                mongo.remove(repositoryMetrics, collectionName);
+            Query idQuery = new Query().addCriteria(where("_id").is(repositoryMetrics.id()));
+            mongo.remove(idQuery, ScheduledMetrics.class);
+            if (mongo.exists(idQuery, RepositoryMetrics.class)) {
+                mongo.remove(idQuery, RepositoryMetrics.class);
             }
             mongo.insert(repositoryMetrics);
         }

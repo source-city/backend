@@ -1,23 +1,42 @@
 package com.github.sourcecity.application;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @RestController
 public class RepositoriesEndpoint {
 
     private List<SseEmitter> emitters = new CopyOnWriteArrayList<>();
 
-    @RequestMapping("/repositories")
+    @Autowired
+    private MongoTemplate mongo;
+
+    @RequestMapping(value = "/repositories", method = GET)
     public List list() {
-        return Collections.emptyList();
+        return Stream.concat(readyRepositories(), notReadyRepositories()).collect(toList());
+    }
+
+    private Stream<RepositoryJson> notReadyRepositories() {
+        return mongo.find(new Query(), ScheduledMetrics.class).stream().map(RepositoryJson::new);
+    }
+
+    private Stream<RepositoryJson> readyRepositories() {
+        return mongo.find(new Query(), RepositoryMetrics.class).stream().map(RepositoryJson::new);
     }
 
     @RequestMapping("/updates")
@@ -37,12 +56,30 @@ public class RepositoriesEndpoint {
     public void onProgressUpdate(ProgressUpdate update){
         emitters.forEach(emitter -> {
             try {
-                emitter.send(update.asMap());
+                emitter.send(update.asMap(), MediaType.APPLICATION_JSON_UTF8);
             } catch (IOException | IllegalStateException e) {
                 emitters.remove(emitter);
             }
         });
     }
 
+    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+    private static class RepositoryJson {
 
+        String id;
+        String name;
+        boolean ready;
+
+        public RepositoryJson(RepositoryMetrics repositoryMetrics) {
+            id = repositoryMetrics.id();
+            name = repositoryMetrics.name();
+            ready = true;
+        }
+
+        public RepositoryJson(ScheduledMetrics scheduledMetrics) {
+            id = scheduledMetrics.id();
+            name = scheduledMetrics.name();
+            ready = false;
+        }
+    }
 }

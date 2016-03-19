@@ -61,6 +61,10 @@ public class RepositoryMetrics {
         return id;
     }
 
+    public String name() {
+        return name;
+    }
+
     private static class FileMetrics {
 
         private final String label;
