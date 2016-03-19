@@ -19,11 +19,13 @@ public class RepositoryMetrics {
 
     private final String id;
     private final String name;
+    private final String url;
     private final List<FileMetrics> fileMetrics = new ArrayList<>();
 
-    public RepositoryMetrics(String id, String name) {
+    public RepositoryMetrics(String id, String name, String url) {
         this.id = id;
         this.name = name;
+        this.url = url;
     }
 
     public void collectFrom(String fileName, String sourceCode) {
@@ -63,6 +65,10 @@ public class RepositoryMetrics {
 
     public String name() {
         return name;
+    }
+
+    public String url() {
+        return url;
     }
 
     private static class FileMetrics {

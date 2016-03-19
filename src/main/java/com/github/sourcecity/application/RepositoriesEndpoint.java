@@ -68,17 +68,20 @@ public class RepositoriesEndpoint {
 
         String id;
         String name;
+        String url;
         boolean ready;
 
         public RepositoryJson(RepositoryMetrics repositoryMetrics) {
             id = repositoryMetrics.id();
             name = repositoryMetrics.name();
+            url = repositoryMetrics.url();
             ready = true;
         }
 
         public RepositoryJson(ScheduledMetrics scheduledMetrics) {
             id = scheduledMetrics.id();
             name = scheduledMetrics.name();
+            url = scheduledMetrics.url();
             ready = false;
         }
     }

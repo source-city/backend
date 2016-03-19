@@ -61,7 +61,8 @@ public class CalculateMetricsJob {
 
                 ProgressCapturingStream progress = new ProgressCapturingStream(stream);
 
-                RepositoryMetrics repositoryMetrics = new RepositoryMetrics(RepositoryId.generate(repositoryUrl), repositoryName);
+                RepositoryMetrics repositoryMetrics =
+                        new RepositoryMetrics(RepositoryId.generate(repositoryUrl), repositoryName, repositoryUrl);
                 ZipInputStream zipInputStream = new ZipInputStream(progress);
                 ZipEntry zipEntry;
                 int lastUpdate = 0;
