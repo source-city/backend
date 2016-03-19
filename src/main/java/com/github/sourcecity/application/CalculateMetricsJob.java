@@ -61,8 +61,9 @@ public class CalculateMetricsJob {
 
                 ProgressCapturingStream progress = new ProgressCapturingStream(stream);
 
+                String repositoryId = RepositoryId.generate(repositoryUrl);
                 RepositoryMetrics repositoryMetrics =
-                        new RepositoryMetrics(RepositoryId.generate(repositoryUrl), repositoryName, repositoryUrl);
+                        new RepositoryMetrics(repositoryId, repositoryName, repositoryUrl);
                 ZipInputStream zipInputStream = new ZipInputStream(progress);
                 ZipEntry zipEntry;
                 int lastUpdate = 0;
@@ -73,8 +74,8 @@ public class CalculateMetricsJob {
                         repositoryMetrics.collectFrom(fileName, fileContent);
                     }
                     int processed = progress.getProgress();
-                    if (processed - lastUpdate > 5000) {
-                        publisher.publishEvent(new ProgressUpdate(repositoryName, processed, total));
+                    if (processed - lastUpdate > 30000) {
+                        publisher.publishEvent(new ProgressUpdate(repositoryId, repositoryName, repositoryUrl, processed, total));
                         System.err.println("Progress: " + processed + " of " + total);
 
                         if (total < 0) {
@@ -83,7 +84,7 @@ public class CalculateMetricsJob {
                         lastUpdate = processed;
                     }
                 }
-                publisher.publishEvent(new ProgressUpdate(repositoryName, total, total));
+                publisher.publishEvent(new ProgressUpdate(repositoryId, repositoryName, repositoryUrl, total, total));
                 store(repositoryMetrics);
             } catch (Exception e) {
                 e.printStackTrace();
