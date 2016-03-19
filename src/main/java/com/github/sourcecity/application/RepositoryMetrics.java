@@ -4,13 +4,17 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.apache.commons.lang3.StringUtils.substringAfterLast;
+import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 
 public class RepositoryMetrics {
 
     private static final Pattern DEPENDENCY_PATTERN = Pattern.compile("^import ", Pattern.MULTILINE);
+    private static final Pattern PACKAGE_PATTERN = Pattern.compile("^package (.*);");
+
     public static final String COLLECTION_NAME = "repositoryMetrics";
 
     private final String id;
@@ -25,10 +29,16 @@ public class RepositoryMetrics {
     public void collectFrom(String fileName, String sourceCode) {
         int loc = calculateLOC(sourceCode);
         int dependencies = calculateDependencies(sourceCode);
-        fileMetrics.add(new FileMetrics(fileName, loc, dependencies));
+        String classFullName = composeClassName(fileName, sourceCode);
+        fileMetrics.add(new FileMetrics(classFullName, loc, dependencies));
     }
-    public void forEachFile(Consumer<FileMetrics> consumer){
-        fileMetrics.forEach(consumer);
+
+    private String composeClassName(String fileName, String sourceCode) {
+        Matcher matcher = PACKAGE_PATTERN.matcher(sourceCode);
+        matcher.find();
+        String packageName = matcher.group(1);
+        String classSimpleName = substringBeforeLast(substringAfterLast(fileName, "/"), ".");
+        return String.format("%s.%s", packageName, classSimpleName);
     }
 
     private int calculateDependencies(String sourceCode) {
@@ -50,12 +60,12 @@ public class RepositoryMetrics {
 
     private static class FileMetrics {
 
-        private final String fileName;
+        private final String className;
         private final int loc;
         private final int dependencies;
 
-        public FileMetrics(String fileName, int loc, int dependencies) {
-            this.fileName = fileName;
+        public FileMetrics(String className, int loc, int dependencies) {
+            this.className = className;
             this.loc = loc;
             this.dependencies = dependencies;
         }

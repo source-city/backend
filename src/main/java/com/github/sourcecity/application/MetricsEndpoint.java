@@ -1,6 +1,5 @@
 package com.github.sourcecity.application;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
@@ -10,9 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -32,9 +29,4 @@ public class MetricsEndpoint {
         return repository;
     }
 
-    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-    private class MetricsJson {
-        String label;
-        Map<String, BigDecimal> metrics = new HashMap<>();
-    }
 }
